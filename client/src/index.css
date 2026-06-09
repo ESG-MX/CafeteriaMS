@@ -1,0 +1,77 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ocultar scrollbar del sidebar sin perder el scroll */
+aside nav {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+aside nav::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    @apply text-gray-800;
+  }
+  * {
+    @apply antialiased;
+  }
+}
+
+/* ── Ticket de impresión térmica 80mm ─────────────────────────── */
+#sdc-ticket {
+  display: none;
+}
+
+/* Preview en pantalla — activado con clase .sdc-ticket-preview */
+#sdc-ticket.sdc-ticket-preview {
+  display: block;
+  width: 72mm;
+  padding: 3mm;
+  background: #fff;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  margin: 0 auto;
+}
+
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #sdc-ticket,
+  #sdc-ticket * {
+    visibility: visible;
+    -webkit-font-smoothing: none !important;
+    -moz-osx-font-smoothing: unset !important;
+    font-smooth: never !important;
+    color: #000 !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  #sdc-ticket {
+    display: block !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 72mm;
+    padding: 3mm 2mm;
+    box-sizing: border-box;
+    background: #fff !important;
+  }
+}

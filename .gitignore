@@ -1,0 +1,31 @@
+# Dependencias
+node_modules/
+server/node_modules/
+client/node_modules/
+
+# Build del frontend
+client/dist/
+
+# Lock files del cliente (se regeneran en CI)
+client/package-lock.json
+
+# Variables de entorno (nunca subir al repo)
+.env
+.env.local
+server/.env
+
+# Base de datos SQLite local (generada automáticamente en modo demo)
+*.db
+*.sqlite
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

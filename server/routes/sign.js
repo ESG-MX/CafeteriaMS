@@ -1,0 +1,61 @@
+/**
+ * sign.js — Endpoint de firma para QZ Tray
+ *
+ * QZ Tray pide que el navegador firme un mensaje con la clave privada
+ * del certificado para verificar que el sitio es de confianza.
+ * La clave privada NUNCA sale del servidor.
+ */
+
+const express = require('express');
+const crypto  = require('crypto');
+const router  = express.Router();
+const { auth } = require('../middleware/auth');
+
+router.use(auth); // Solo usuarios autenticados pueden obtener firma para QZ Tray
+
+// Clave privada RSA 2048 — para firma QZ Tray
+// Certificado válido hasta 2036. Solo para uso interno con QZ Tray.
+const PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDFRAPL9ktL1RC0
+j7J6vLu7c06tglqC2NMlx3brezkmPJ8fjCAaq9qhY2i9geKDsUD7uj7Pg61L+Ado
+OW0ppzi7TuGZ9TNTaqpn3Za6dURpxK2+BFLQQTxnrZUQRsER/scfyVhEKZLfrt/4
+zYE9zGgX1bhUJIAdNBxNceJMT3fbOQHm+muTe31nmGDoyOrHsnTeywecspJaZwwJ
+xYQLV86/P2pFyZxQhRXSBbrJ4VS097sZmBINa3RyZPf+sNtRzQgpAeaNeeA1slTa
+nNNwzdgRRZzV0d9iCJ0OD8egKVm1KFEtM7BsQhcwwP0Yt3+ZaMobYivYFLMS53Fm
++/uTUQOFAgMBAAECggEAKDdqkr1+slIY2sbk+zLZDyk95A/MRhrQSUZ2DyILD6mS
+Q0s9DFL2+qoao3AEbxbHCcr5nTLaNL+3Ot9iSvilj0JQqiOcOChp300EurTHosyP
+I0scWwrBtt1jo3LZT8Lic6+HyDW1lNbBIKc87w1qN1nB/52FZO7Hyl4qZaZZ6B5G
+WP81aWot8cdDmGPAE7YWmk6UOGp6AQtnPZiVCbdh1+B2HoC1+YOsLfycrm9a0qCk
+kN/uAKp39sk5vrL0ITkt4wPo+pzOhWr0iPi16bslGP+9U0aDW96uDwITefZfHvPv
+cHK7Cnc2GOu6+/HjE0pJYId2liRQBMYvFl30SYqJQQKBgQDwLKG6Q66dE6QYvuDT
+WrFv2BdQMu2QX+UytGoWrWXOY2VrerPGJuq3WXGWD2DILRwZ6pgqBmfL5zBLMzZz
+V45IZgualTOCYjZ3YFbH3v0TXQF8h/qfE55fUBAFFCM+tGQY8Lexj4HJjb8AWlaC
+GO+1w6z7e+1LDZemAaMZcCIvtQKBgQDSQ5SjHwax7DKQjsdWdEM2VkpJZShiRJeS
+OtLXQonCSzbxE0PjfmTSb3F4RCr0iGeXa84D8512+Koi4X/BUX60L1/oetY8+yy7
+97/UdM5H5D8ZmQJyBRGgXa2NoCoHgsSEyxJWK/lVIDkmxK9f2RUH8w/kKtF4NaFE
+Op5635bGkQKBgBVm5MKEZXr51RWfbMlou4cL6ofrAeBrqzDpgsqiiP/rO45oULzH
+mwLbpZOJq0YrPuXQUd7s0zMIVvVciu2cT8GD1mTgBscHmXLp0tHcvRCMqSU/uMWU
+Kfi0WbkaIknkKUdPrA7Wiuo7B1owsqTFNBcuaKvAT1Tw0SKp4q7RnzpBAoGBAKJ6
+rJpcuFy3C9/fJTSuhN2xUphivhEptgK+x/ylozRr0Nn7rCNYoWpnycRI0PTDj2FY
+Ygt1roGn6DkqDgICCqoMTc2lVnYrFkduTGNNm7W8L/KE5XncZuGIYjulv7SsHVYM
+YnAKbRKV4vQNWwPzCShqcCY93D5LGwJRVfPXYXixAoGAFYildSxY9Me86VNxS6uf
+2uBhEDfT4swzUgEGJvFsnsk0VmdI5knxmt/vVK5MU/ungL7bdb5i4Ddqf6ZVeoH0
+xPuDY4HzqxZ3k6Ye+WwgydglOc+q2NDq+3K7A6RcAE6506PJC5x3pgYnKCanT2Tv
+jBVYnkVzzjPKtXtQUjPWTyA=
+-----END PRIVATE KEY-----`;
+
+// Firma el mensaje con SHA-512 + RSA (algoritmo que usa QZ Tray por defecto)
+router.post('/', (req, res) => {
+  const { message } = req.body;
+  if (!message) return res.status(400).json({ error: 'message requerido' });
+  try {
+    const sign = crypto.createSign('SHA512');
+    sign.update(message);
+    const signature = sign.sign(PRIVATE_KEY, 'base64');
+    res.json({ signature });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+module.exports = router;
