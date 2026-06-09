@@ -1,108 +1,108 @@
 # CafeteriaMS
 
-A full-stack multi-tenant meal management system for enterprise cafeterias. Employees access meal services using RFID cards or employee numbers; transactions are recorded in real time, limits enforced per employee, and detailed Excel reports generated for payroll.
+Sistema de gestión de comedor empresarial multi-tenant. Los empleados acceden a los servicios de comida mediante tarjeta RFID o número de empleado; las transacciones se registran en tiempo real, se aplican límites por empleado y se generan reportes detallados en Excel para nómina.
 
-## Tech Stack
+## Stack tecnológico
 
-| Layer | Technology |
-|-------|-----------|
+| Capa | Tecnología |
+|------|-----------|
 | Frontend | React 19, Vite, Tailwind CSS, React Router |
 | Backend | Node.js 22, Express, WebSocket (ws) |
-| Auth | JWT + bcrypt, role-based access control |
-| Database | SQLite (local demo) / Azure SQL (production) |
-| Printing | QZ Tray (thermal receipts) |
-| Reports | ExcelJS (Excel export with formatting) |
-| Deploy | Azure App Service + GitHub Actions |
+| Autenticación | JWT + bcrypt, control de acceso por roles |
+| Base de datos | SQLite (demo local) / Azure SQL (producción) |
+| Impresión | QZ Tray (tickets térmicos) |
+| Reportes | ExcelJS (exportación a Excel con formato) |
+| Despliegue | Azure App Service + GitHub Actions |
 
-## Features
+## Funcionalidades
 
-- **RFID / Employee number / Biometric** scanning at point of service
-- **Multi-tenant**: unlimited companies, each with its own employees, services, and limits
-- **Time-based service detection**: automatically assigns Breakfast / Lunch / Dinner based on time of day
-- **Per-employee limits**: daily and weekly caps configurable per service
-- **Live dashboard**: real-time KPIs and transaction feed via WebSocket
-- **Excel reports**: detailed transaction export + formal monthly payroll document with IVA breakdown
-- **Roles**: `super_admin` (all companies), `admin_empresa` (one company), `scanner` (terminal only)
-- **Thermal printing**: silent printing via QZ Tray with RSA signature
+- **Escaneo RFID / Número de empleado / Biométrico** en punto de servicio
+- **Multi-tenant**: empresas ilimitadas, cada una con sus propios empleados, servicios y límites
+- **Detección de servicio por horario**: asigna automáticamente Desayuno / Comida / Cena según la hora
+- **Límites por empleado**: cuotas diarias y semanales configurables por servicio
+- **Dashboard en vivo**: KPIs en tiempo real y feed de transacciones vía WebSocket
+- **Reportes Excel**: exportación detallada de transacciones y documento mensual de nómina con desglose de IVA
+- **Roles**: `super_admin` (todas las empresas), `admin_empresa` (una empresa), `scanner` (solo terminal)
+- **Impresión térmica**: impresión silenciosa vía QZ Tray con firma RSA
 
-## Quick Start (Local Demo — SQLite, no Azure required)
+## Inicio rápido (Demo local — SQLite, sin Azure)
 
-### Prerequisites
+### Requisitos
 
 - Node.js 22+
 - npm 9+
 
-### Steps
+### Pasos
 
 ```bash
-# 1. Clone the repo
-git clone <repo-url>
+# 1. Clona el repositorio
+git clone https://github.com/ESG-MX/CafeteriaMS.git
 cd CafeteriaMS
 
-# 2. Install dependencies (includes better-sqlite3 for local DB)
+# 2. Instala dependencias del backend
 npm install
 
-# 3. Create your .env file
+# 3. Crea tu archivo .env
 cp .env.example .env
-# Edit .env — the only required value for local demo is JWT_SECRET
+# El único valor requerido para la demo local es JWT_SECRET
 
-# 4. Install frontend dependencies
+# 4. Instala dependencias del frontend
 npm --prefix client install
 
-# 5. Start dev server (backend on :3001, frontend on :5173)
+# 5. Inicia los servidores (backend en :3001, frontend en :5173)
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Abre [http://localhost:5173](http://localhost:5173) en tu navegador.
 
-### Demo credentials
+### Credenciales de demo
 
-| Username | Password | Role | Access |
-|----------|----------|------|--------|
-| `admin` | `admin123` | Super Admin | All companies |
+| Usuario | Contraseña | Rol | Acceso |
+|---------|-----------|-----|--------|
+| `admin` | `admin123` | Super Admin | Todas las empresas |
 | `Admin_CompanyA` | `admin123` | Admin | Demo Company A |
 | `Admin_CompanyB` | `admin123` | Admin | Demo Company B |
 | `Admin_CompanyC` | `admin123` | Admin | Demo Company C |
 
-> **First login flow**: select a company on the first screen, then enter your credentials.
-> The Super Admin can select any company.
+> **Flujo de login**: selecciona una empresa en la primera pantalla y luego ingresa tus credenciales.
+> El Super Admin puede seleccionar cualquier empresa.
 
-## Production (Azure SQL)
+## Producción (Azure SQL)
 
-1. Set `DB_CONNECTION_STRING` in your `.env` (or App Service environment variables) to your Azure SQL ADO.NET connection string.
-2. Remove `USE_SQLITE=true` if set — the app detects Azure SQL automatically.
-3. Deploy with `npm run build && npm start`, or push to the `master` branch (CI workflow runs but deploy step is disabled by default — re-enable it in `.github/workflows/` if needed).
+1. Define `DB_CONNECTION_STRING` en tu `.env` (o en las variables de entorno de App Service) con tu cadena de conexión ADO.NET de Azure SQL.
+2. Elimina `USE_SQLITE=true` si está definido — la app detecta Azure SQL automáticamente.
+3. Despliega con `npm run build && npm start`, o haz push a la rama `master` (el workflow de CI corre pero el paso de deploy está deshabilitado por defecto — actívalo en `.github/workflows/` si es necesario).
 
-## Project Structure
+## Estructura del proyecto
 
 ```
 ├── server/
-│   ├── index.js          # Express + HTTP server + WebSocket
-│   ├── db.js             # Azure SQL adapter (mssql)
-│   ├── db-sqlite.js      # SQLite adapter (local demo)
+│   ├── index.js          # Express + servidor HTTP + WebSocket
+│   ├── db.js             # Adaptador Azure SQL (mssql)
+│   ├── db-sqlite.js      # Adaptador SQLite (demo local)
 │   ├── middleware/
-│   │   └── auth.js       # JWT verification + role guards
-│   └── routes/           # API route modules
+│   │   └── auth.js       # Verificación JWT + guards por rol
+│   └── routes/           # Módulos de rutas de la API
 ├── client/
 │   ├── src/
-│   │   ├── pages/        # React pages
+│   │   ├── pages/        # Páginas React
 │   │   ├── layout/       # Sidebar + Topbar
-│   │   ├── context/      # Auth context + permissions
-│   │   └── utils/        # Printer helper (QZ Tray)
-│   └── public/           # Static assets
-└── .github/workflows/    # CI (deploy disabled)
+│   │   ├── context/      # Contexto de autenticación y permisos
+│   │   └── utils/        # Helper de impresión (QZ Tray)
+│   └── public/           # Archivos estáticos
+└── .github/workflows/    # CI (deploy deshabilitado)
 ```
 
-## API Overview
+## API
 
-| Method | Path | Description |
+| Método | Ruta | Descripción |
 |--------|------|-------------|
-| POST | `/api/auth/login` | Login with company + credentials |
-| GET | `/api/dashboard` | KPIs + recent activity |
-| POST | `/api/rfid/scan` | Process a meal scan (core transaction) |
-| GET/POST/PUT | `/api/employees` | Employee CRUD + bulk upload |
-| GET/POST/PUT | `/api/clients` | Company management |
-| GET/POST/PUT | `/api/services` | Service catalog |
-| GET | `/api/purchases` | Transaction history |
-| GET | `/api/reports` | Excel export |
-| GET/POST/PUT | `/api/users` | User management |
+| POST | `/api/auth/login` | Login con empresa + credenciales |
+| GET | `/api/dashboard` | KPIs + actividad reciente |
+| POST | `/api/rfid/scan` | Procesar un escaneo de comida (transacción principal) |
+| GET/POST/PUT | `/api/employees` | CRUD de empleados + carga masiva |
+| GET/POST/PUT | `/api/clients` | Gestión de empresas |
+| GET/POST/PUT | `/api/services` | Catálogo de servicios |
+| GET | `/api/purchases` | Historial de transacciones |
+| GET | `/api/reports` | Exportación a Excel |
+| GET/POST/PUT | `/api/users` | Gestión de usuarios |
