@@ -30,7 +30,7 @@ if %errorlevel% equ 0 (
 echo.
 echo =============================================
 echo   Instalacion completada.
-echo   Abre el SDC en el navegador, intenta
+echo   Abre CafeteriaMS en el navegador, intenta
 echo   imprimir y selecciona "Allow" + marca
 echo   "Remember this decision" en QZ Tray.
 echo   Despues de eso nunca volvera a preguntar.
